@@ -37,15 +37,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signInWithGoogle = async () => {
         await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "http://localhost:3000"
+            provider: "google"
         });
     };
 
     const signInWithApple = async () => {
         await authClient.signIn.social({
-            provider: "apple",
-            callbackURL: "http://localhost:3000"
+            provider: "apple"
         });
     };
 
