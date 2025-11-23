@@ -1,20 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, ArrowLeft, Grid2X2, History } from 'lucide-react';
+import { Plus, ArrowLeft, Grid2X2, History, Smartphone } from 'lucide-react';
 import { Activity, DurationCategory } from './types';
 import { INITIAL_ACTIVITIES, CATEGORIES } from './constants';
 import { CategoryCard } from './components/CategoryCard';
 import { ActivityModal } from './components/ActivityModal';
 import { ResultReveal } from './components/ResultReveal';
 import { ActivityList } from './components/ActivityList';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ConnectDeviceModal } from './components/ConnectDeviceModal';
+import { Toast } from './components/Toast';
 import { motion } from 'framer-motion';
+import { Button } from './components/Button';
+import { api } from './lib/api';
 
-function App() {
+function AuthenticatedApp() {
+  const { user, signOut } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [view, setView] = useState<'home' | 'list'>('home');
-  
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      api.connect(user.id);
+    }
+
+    const unsubscribe = api.subscribe((data) => {
+      if (data.type === 'pitch') {
+        setToastMessage(`Partner pitched: ${data.activity.title}`);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    const handleNotification = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setToastMessage(customEvent.detail.message);
+    };
+
+    window.addEventListener('mock-notification', handleNotification);
+    return () => window.removeEventListener('mock-notification', handleNotification);
+  }, []);
+
   useEffect(() => {
     const saved = localStorage.getItem('us-time-activities');
     if (saved) {
@@ -51,7 +83,7 @@ function App() {
   const pickRandomActivity = (category: DurationCategory) => {
     const pool = activities.filter(a => a.category === category);
     if (pool.length === 0) return;
-    
+
     const randomIndex = Math.floor(Math.random() * pool.length);
     setSelectedActivity(pool[randomIndex]);
     setShowResult(true);
@@ -76,40 +108,54 @@ function App() {
           </h1>
           <p className="text-sm font-bold text-stone-400 tracking-wide">NO MORE BORING DAYS</p>
         </div>
-        
-        <button 
-          onClick={() => setView(view === 'home' ? 'list' : 'home')}
-          className="w-12 h-12 rounded-xl border-2 border-black bg-white hard-shadow hover:bg-stone-100 flex items-center justify-center transition-transform active:translate-y-1 active:shadow-none"
-        >
-          {view === 'home' ? <Grid2X2 size={20} /> : <ArrowLeft size={20} />}
-        </button>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowConnectModal(true)}
+            className="w-12 h-12 rounded-xl border-2 border-black bg-white hard-shadow hover:bg-stone-100 flex items-center justify-center transition-transform active:translate-y-1 active:shadow-none"
+          >
+            <Smartphone size={20} />
+          </button>
+          <button
+            onClick={() => setView(view === 'home' ? 'list' : 'home')}
+            className="w-12 h-12 rounded-xl border-2 border-black bg-white hard-shadow hover:bg-stone-100 flex items-center justify-center transition-transform active:translate-y-1 active:shadow-none"
+          >
+            {view === 'home' ? <Grid2X2 size={20} /> : <ArrowLeft size={20} />}
+          </button>
+          <button
+            onClick={signOut}
+            className="w-12 h-12 rounded-xl border-2 border-black bg-white hard-shadow hover:bg-stone-100 flex items-center justify-center transition-transform active:translate-y-1 active:shadow-none text-red-500"
+          >
+            <History size={20} />
+          </button>
+        </div>
       </header>
 
       {/* Content */}
       <main className="relative z-10 flex-1">
         {view === 'home' ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
           >
-             <div className="grid grid-cols-1 gap-5">
-               {Object.values(CATEGORIES).map((config, i) => (
-                 <motion.div
+            <div className="grid grid-cols-1 gap-5">
+              {Object.values(CATEGORIES).map((config, i) => (
+                <motion.div
                   key={config.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                 >
-                   <CategoryCard
-                     config={config}
-                     count={counts[config.id]}
-                     onClick={() => pickRandomActivity(config.id)}
-                     disabled={counts[config.id] === 0}
-                   />
-                 </motion.div>
-               ))}
-             </div>
+                >
+                  <CategoryCard
+                    config={config}
+                    count={counts[config.id]}
+                    onClick={() => pickRandomActivity(config.id)}
+                    disabled={counts[config.id] === 0}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -130,19 +176,24 @@ function App() {
       {/* Floating Action Button - Neo Style */}
       {view === 'home' && (
         <div className="fixed bottom-8 right-8 lg:right-[calc(50%-220px)] z-30">
-            <motion.button
+          <motion.button
             whileHover={{ scale: 1.1, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowAddModal(true)}
             className="flex items-center justify-center w-16 h-16 rounded-full bg-black text-white border-2 border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)] transition-all"
-            >
+          >
             <Plus size={32} strokeWidth={3} />
-            </motion.button>
+          </motion.button>
         </div>
       )}
 
-      <ActivityModal 
-        isOpen={showAddModal} 
+      <ConnectDeviceModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+      />
+
+      <ActivityModal
+        isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={addActivity}
       />
@@ -153,8 +204,57 @@ function App() {
         onClose={() => setShowResult(false)}
         onReroll={() => selectedActivity && pickRandomActivity(selectedActivity.category)}
       />
+
+      <Toast
+        message={toastMessage}
+        onClose={() => setToastMessage(null)}
+      />
     </div>
   );
+}
+
+function LoginScreen() {
+  const { signInWithGoogle, signInWithApple } = useAuth();
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFFBF5]">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-5xl font-black mb-2">UsTime<span className="text-[#FF5A5F]">.</span></h1>
+        <p className="text-stone-500 font-bold mb-12">NO MORE BORING DAYS</p>
+
+        <div className="space-y-4">
+          <Button onClick={signInWithGoogle} className="w-full py-4 text-lg">
+            Sign in with Google
+          </Button>
+          <Button onClick={signInWithApple} variant="secondary" className="w-full py-4 text-lg">
+            Sign in with Apple
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  return <AuthenticatedApp />;
 }
 
 export default App;

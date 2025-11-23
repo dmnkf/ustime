@@ -1,52 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UsTime</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --font-heading: 'Space Grotesk', sans-serif;
-        --font-body: 'DM Sans', sans-serif;
-      }
-      body {
-        font-family: var(--font-body);
-        background-color: #FFFBF5; /* Warm Paper */
-        color: #18181B;
-      }
-      h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-heading);
-      }
-      /* Hide scrollbar for clean look but allow functionality */
-      ::-webkit-scrollbar {
-        width: 0px;
-        background: transparent;
-      }
-      .hard-shadow {
-        box-shadow: 4px 4px 0px 0px rgba(24, 24, 27, 1);
-      }
-      .hard-shadow-sm {
-        box-shadow: 2px 2px 0px 0px rgba(24, 24, 27, 1);
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24"
-  }
-}
-</script>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UsTime</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: #FFFBF5;
+      /* Warm Paper */
+      color: #18181B;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-heading);
+    }
+
+    /* Hide scrollbar for clean look but allow functionality */
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+
+    .hard-shadow {
+      box-shadow: 4px 4px 0px 0px rgba(24, 24, 27, 1);
+    }
+
+    .hard-shadow-sm {
+      box-shadow: 2px 2px 0px 0px rgba(24, 24, 27, 1);
+    }
+  </style>
+
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
